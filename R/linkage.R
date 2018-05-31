@@ -1,0 +1,313 @@
+#' @title
+#' Linkage Methods for Hierarchical Clustering
+#'
+#' @description
+#' Agglomerative hierarchical clustering of a matrix of dissimilarities.
+#'
+#' @param prox
+#'   Object of class \code{"\link[stats]{dist}"} containing the lower triangle
+#'   of a proximity matrix in the form of distances.
+#' @param method
+#'   Character string specifying the linkage method to be used. This should be
+#'   one of: \code{"versatile"}, \code{"single"}, \code{"complete"},
+#'   \code{"arithmetic"} (default), \code{"geometric"}, \code{"harmonic"},
+#'   \code{"ward"}, \code{"centroid"} or \code{"flexible"}. See the
+#'   \emph{Details} section.
+#' @param weighted
+#'   Logical to choose between the weighted and the unweighted (default)
+#'   versions of some clustering methods. Weighted clustering gives merging
+#'   branches in a hierarchical tree equal weight regardless of the number of
+#'   individuals carried on each branch. Such a procedure weights the
+#'   individuals unequally, contrasting with unweighted clustering that gives
+#'   equal weight to each individual in the clusters. This parameter has no
+#'   effect on the \code{"single"}, \code{"complete"} and \code{"ward"}
+#'   linkages.
+#' @param par.method
+#'   A real value in the range [-1, 1] required as parameter for the methods
+#'   \code{"versatile"} and \code{"flexible"}. See the \emph{Details} section.
+#' @param digits
+#'   Integer specifying the precision, i.e. the number of significant decimal
+#'   digits of the data and for the calculations. This is a very important
+#'   parameter, since equal proximity values at a certain precision may become
+#'   different by increasing its value. Thus, it may be responsible of the
+#'   existence of tied distances. The rule should be not to use a precision
+#'   larger than the resolution given by the experimental setup that has
+#'   generated the data. If \code{digits=NULL} (default), then the precision is
+#'   set to that of the data value with the largest number of significant
+#'   decimal digits.
+#'
+#' @details
+#'
+#' Starting from a matrix of dissimilarities, \code{\link{linkage}()} calculates
+#' its dendrogram with the most commonly used agglomerative hierarchical
+#' clustering methods, e.g. single linkage, complete linkage, arithmetic
+#' linkage (also known as average linkage) and Ward's method. You can also
+#' choose between the weighted and the unweighted versions of some clustering
+#' methods, e.g. weighted centroid (WPGMC) and unweighted centroid (UPGMC).
+#' Importantly, it contains a new parameterized method named versatile linkage,
+#' which includes single linkage, complete linkage and average linkage as
+#' particular cases, and which naturally defines two new methods, geometric
+#' linkage and harmonic linkage (hence the convenience to rename average linkage
+#' as arithmetic linkage, to emphasize the existence of different types of
+#' averages).
+#'
+#' The difference between the available hierarchical clustering methods rests in
+#' the way the distance between clusters is defined. During the agglomeration
+#' process, the data items are iteratively joined to form clusters, merging
+#' first the clusters that are at the minimum distance. However, given two
+#' clusters, each one formed by several data observations, there exist many
+#' ways of defining the distance between the clusters from the dissimilarities
+#' between their constituent individuals. Among these linkage methods, we have
+#' the following ones:
+#' \itemize{
+#' \item \code{"single"}: the distance between clusters equals the minimum
+#'   distance between individuals.
+#' \item \code{"complete"}: the distance between clusters equals the maximum
+#'   distance between individuals.
+#' \item \code{"arithmetic"}: the distance between clusters equals the
+#'   arithmetic mean distance between individuals. Also known as average
+#'   linkage, WPGMA (weighted version) or UPGMA (unweighted version).
+#' \item \code{"geometric"}: the distance between clusters equals the
+#'   geometric mean distance between individuals.
+#' \item \code{"harmonic"}: the distance between clusters equals the
+#'   harmonic mean distance between individuals.
+#' \item \code{"versatile"}: the distance between clusters equals the
+#'   generalized power mean distance between individuals. It depends on the
+#'   value of \code{par.method}, with the following linkage methods as
+#'   particular cases: \code{"complete"} (\code{par.method=+1}),
+#'   \code{"arithmetic"} (\code{par.method=+0.1}), \code{"geometric"}
+#'   (\code{par.method=0}), \code{"harmonic"} (\code{par.method=-0.1}) and
+#'   \code{"single"} (\code{par.method=-1}).
+#' \item \code{"ward"}: the distance between clusters is a weighted squared
+#'   Euclidean distance between the centroids of each cluster (Ward, 1963).
+#' \item \code{"centroid"}: the distance between clusters equals the square
+#'   of the Euclidean distance between the centroids of each cluster. Also
+#'   known as WPGMC (weighted version) or UPGMC (unweighted version).
+#' \item \code{"flexible"}: the distance between clusters is a weighted sum
+#'   of the distances between clusters in the previous iteration (Lance and
+#'   Williams, 1967; Belbin \emph{et al.}, 1992). It depends on the value of
+#'   \code{par.method}, and it is equivalent to \code{"arithmetic"} linkage
+#'   when \code{par.method=0}.
+#' }
+#'
+#' Except for the cases containing ties in proximity values as described in the
+#' next paragraph, the following equivalences hold between the
+#' \code{\link{linkage}()} function in this package, the
+#' \code{\link[stats]{hclust}()} function in the \pkg{stats} package, and the
+#' \code{\link[cluster]{agnes}()} function in the \pkg{cluster} package. When
+#' relevant, weighted (\code{W}) or unweighted (\code{U}) versions of the
+#' linkage methods and the values for \code{par.method} (\eqn{\beta}) are
+#' indicated:
+#' \tabular{lll}{
+#'   \code{linkage} \tab \code{hclust} \tab \code{agnes} \cr
+#'   \code{==================} \tab \code{============} \tab
+#'     \code{===================} \cr
+#'   \code{"single"} \tab \code{"single"} \tab \code{"single"} \cr
+#'   \code{"complete"} \tab \code{"complete"} \tab \code{"complete"} \cr
+#'   \code{"arithmetic", U} \tab \code{"average"} \tab \code{"average"} \cr
+#'   \code{"arithmetic", W} \tab \code{"mcquitty"} \tab \code{"weighted"} \cr
+#'   \code{"ward"} \tab \code{"ward.D2"} \tab \code{"ward"} \cr
+#'   \code{"centroid", U} \tab \code{"centroid"} \tab \code{--------} \cr
+#'   \code{"centroid", W} \tab \code{"median"} \tab \code{--------} \cr
+#'   \code{"flexible", U, } \eqn{\beta} \tab \code{--------} \tab
+#'     \code{"gaverage", } \eqn{\beta} \cr
+#'   \code{"flexible", W, } \eqn{\beta} \tab \code{--------} \tab
+#'     \code{"flexible", } \eqn{(1-\beta)/2} \cr
+#' }
+#'
+#' \code{\link{linkage}()} implements the variable-group approach introduced in
+#' Fernandez and Gomez (2008) to solve the non-uniqueness problem found in the
+#' pair-group implementations. This problem arises when two or more minimum
+#' distances between different clusters are equal during the amalgamation
+#' process. The pair-group approach consists in choosing a pair, breaking the
+#' ties between distances, and proceeds in the same way until the final
+#' hierarchical classification is obtained. However, different dendrograms are
+#' possible depending on the criterion used to break the ties (usually a pair is
+#' just chosen at random). The variable-group approach groups more than two
+#' clusters at the same time when ties occur, what always produces a uniquely
+#' determined solution. When there are no ties, the variable-group approach
+#' gives the same results as the pair-group one.
+#'
+#' @return
+#' Returns an object of class \code{"\link[stats]{dendrogram}"}.
+#'
+#' @references
+#'
+#' L. Belbin, D.P. Faith and G.W. Milligan (1992). A comparison of two
+#' approaches to beta-flexible clustering. \emph{Multivariate Behavioral
+#' Research}, 27(3):417-433.
+#'
+#' A. Fernández and S. Gómez (2008). Solving non-uniqueness in agglomerative
+#' hierarchical clustering using multidendrograms. \emph{Journal of
+#' Classification}, 25(1):43-65.
+#'
+#' G.N. Lance and W.T. Williams (1967). A general theory of classificatory
+#' sorting strategies: 1. Hierarchical systems. \emph{The Computer Journal},
+#' 9(4):373-380.
+#'
+#' J.H. Ward (1963). Hierarchical grouping to optimize an objective function.
+#' \emph{Journal of the American Statistical Association}, 58(301):236-244.
+#'
+#' @seealso
+#' \code{\link{dendesc}} for descriptive measures to analyze dendrograms.
+#'
+#' @examples
+#' ## distances between 10 cities in the US
+#' data(UScitiesD)
+#'
+#' ## unweighted arithmetic linkage (UPGMA)
+#' lnk1 <- linkage(UScitiesD, method="arithmetic", weighted=FALSE)
+#' plot(lnk1, main="linkage(arithmetic, U)")
+#'
+#' ## weighted arithmetic linkage (WPGMA)
+#' lnk2 <- linkage(UScitiesD, method="arithmetic", weighted=TRUE)
+#'
+#' ## equivalence with hclust, except for the ordering of the leaves
+#' hcl2 <- as.dendrogram(hclust(UScitiesD, method="mcquitty"))
+#' sum(abs(ultrametric(lnk2) - ultrametric(hcl2)))  # 0
+#' opar <- par(mfrow=c(1, 2))
+#' plot(lnk2, main="linkage(arithmetic, W)")
+#' plot(hcl2, main="hclust(mcquitty)")
+#' par(opar)
+#'
+#' ## unweighted versatile linkage, with par.method=-0.6
+#' lnk3 <- linkage(UScitiesD, method="versatile", weighted=FALSE,
+#'                 par.method=-0.6)
+#' plot(lnk3, main="linkage(versatile, -0.6, U)")
+#'
+#' ## cophenetic correlation coefficient
+#' cor(UScitiesD, ultrametric(lnk1))  # 0.8101937
+#' cor(UScitiesD, ultrametric(lnk2))  # 0.8076422
+#' cor(UScitiesD, ultrametric(lnk3))  # 0.8163286
+#'
+#' @export
+linkage <- function(prox, method = "arithmetic", weighted = FALSE,
+                    par.method = 0.0, digits = NULL) {
+  storage.mode(prox) <- "double"  # ensure proximity values in double type
+  jprox <- rJava::.jnew(
+    class="multidendrograms/core/definitions/SymmetricMatrix", prox)
+  if (is.null(digits)) {
+    digits <- rJava::.jcall(obj=jprox, returnSig="I", method="getPrecision")
+  }
+  labls <- labels(prox)
+  if (is.null(labls)) {
+  	members <- attr(prox, which="Size")
+  	labls <- as.character(1:members)  # assign default labels
+  }
+  dbased <- TRUE
+  if (method == "versatile") {
+    pw <- invsigmoid(par.method)
+    hc <- 
+      rJava::.jnew(class="multidendrograms/core/clusterings/VersatileLinkage",
+      jprox, labls, dbased, digits, weighted, pw)
+  } else if (method == "single") {
+    hc <- rJava::.jnew(class="multidendrograms/core/clusterings/SingleLinkage",
+      jprox, labls, dbased, digits)
+  } else if (method == "complete") {
+    hc <- 
+      rJava::.jnew(class="multidendrograms/core/clusterings/CompleteLinkage",
+      jprox, labls, dbased, digits)
+  } else if (method == "arithmetic") {
+    pw <- +1.0
+    hc <- 
+      rJava::.jnew(class="multidendrograms/core/clusterings/VersatileLinkage",
+      jprox, labls, dbased, digits, weighted, pw)
+  } else if (method == "geometric") {
+    pw <- 0.0
+    hc <- 
+      rJava::.jnew(class="multidendrograms/core/clusterings/VersatileLinkage",
+      jprox, labls, dbased, digits, weighted, pw)
+  } else if (method == "harmonic") {
+    pw <- -1.0
+    hc <- 
+      rJava::.jnew(class="multidendrograms/core/clusterings/VersatileLinkage",
+      jprox, labls, dbased, digits, weighted, pw)
+  } else if (method == "centroid") {
+    hc <- rJava::.jnew(class="multidendrograms/core/clusterings/Centroid",
+      jprox, labls, dbased, digits, weighted)
+  } else if (method == "ward") {
+    hc <- rJava::.jnew(class="multidendrograms/core/clusterings/Ward",
+      jprox, labls, dbased, digits)
+  } else if (method == "flexible") {
+    hc <- rJava::.jnew(class="multidendrograms/core/clusterings/BetaFlexible",
+      jprox, labls, dbased, digits, weighted, par.method)
+  }
+  rJava::.jcall(obj=hc, returnSig="V", method="build")
+  jdendro <- rJava::.jcall(obj=hc, 
+    returnSig="Lmultidendrograms/core/definitions/Dendrogram;",
+    method="getRoot")
+  dendro <- asdendrogram(jdendro)
+  return(dendro)
+}
+
+invsigmoid <- function(y) {
+  y1 <- 0.1
+  return(ifelse(y <= -1, -Inf,
+         ifelse(y >= +1, +Inf,
+                         log((1 + y) / (1 - y)) / log((1 + y1) / (1 - y1)))))
+}
+
+asdendrogram <- function(jdendro) {
+  uniform.origin <- TRUE
+  sa <- rJava::.jnew(class="multidendrograms/core/utils/SmartAxis", jdendro,
+    uniform.origin)
+  dbased <- rJava::.jfield(o=jdendro, sig="Z", name="isDistanceBased")
+  if (dbased) {
+    bottom <- rJava::.jcall(obj=sa, returnSig="D", method="smartMin")
+  } else {
+    bottom <- rJava::.jcall(obj=sa, returnSig="D", method="smartMax")
+  }
+  dendro <- list()
+  dendro <- recdendrogram(dendro, ancestors=c(), jdendro, bottom)
+  class(dendro) <- "dendrogram"
+  return(dendro)
+}
+
+recdendrogram <- function(dendro, ancestors, jdendro, bottom) {
+  membrs <- as.integer(rJava::.jcall(obj=jdendro, returnSig="I", 
+    method="numberOfLeaves"))
+  nsubdendros <- rJava::.jcall(obj=jdendro, returnSig="I", 
+    method="numberOfSubclusters")
+  if (nsubdendros == 1) {
+    id <- rJava::.jcall(obj=jdendro, returnSig="I", method="getIdentifier")
+    labl <- rJava::.jcall(obj=jdendro, returnSig="S", method="getLabel")
+    if (is.null(ancestors)) {
+      attributes(dendro) <- list(members=membrs, height=bottom, midpoint=0,
+        label=labl, leaf=TRUE)
+    } else {
+      dendro[[ancestors]] <- as.vector(id)
+      attributes(dendro[[ancestors]]) <- list(members=membrs, height=bottom,
+        midpoint=0, label=labl, leaf=TRUE)
+    }
+  } else {
+    lastchild <- 0
+    for (n in 1:nsubdendros) {
+      subd <- rJava::.jcall(obj=jdendro, 
+        returnSig="Lmultidendrograms/core/definitions/Dendrogram;", 
+        method="getSubcluster", as.integer(n-1))
+      dendro[[c(ancestors, n)]] <- list()
+      dendro <- recdendrogram(dendro, c(ancestors, n), subd, bottom)
+      if (n == 1) {
+        firstchild <- attr(dendro[[c(ancestors, n)]], which="midpoint")
+        lastchild <- lastchild + rJava::.jcall(obj=subd, returnSig="I", 
+          method="numberOfLeaves")
+      } else if (n == nsubdendros) {
+        lastchild <- lastchild + 
+          attr(dendro[[c(ancestors, n)]], which="midpoint")
+      } else {
+        lastchild <- lastchild + 
+          rJava::.jcall(obj=subd, returnSig="I", method="numberOfLeaves")
+      }
+    }
+    hght <- rJava::.jcall(obj=jdendro, returnSig="D",
+      method="getRootBottomHeight")
+    midpnt <- (firstchild + lastchild) / 2
+    if (is.null(ancestors)) {
+      attributes(dendro) <- list(members=membrs, height=hght, midpoint=midpnt)
+    } else {
+      attributes(dendro[[ancestors]]) <- 
+        list(members=membrs, height=hght, midpoint=midpnt)
+    }
+  }
+  return(dendro)
+}
