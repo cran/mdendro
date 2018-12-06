@@ -1,7 +1,7 @@
-6b0bb86dceb2ec5970b585c9bdd0f57e *DESCRIPTION
+0c90de29cb9789952cf680c02b72a325 *DESCRIPTION
 75e8a10d2effad6fa0bef0965f52bedf *NAMESPACE
 accfd1be06370f85fe1e8fa4d17d9b13 *R/dendesc.R
-d651a9306a4676bf681bf8df3ddac7e5 *R/linkage.R
+2acde504ab97b5751e5c38cdd6bf08b3 *R/linkage.R
 363fbed84c8b271c48d7304aebabdabc *R/onLoad.R
 36221791dfd3fb90674b6cf02b126f36 *inst/java/multidendrograms.jar
 d578cc4dbd2bf0878615dd7e9a9f53de *java/clusterings/BetaFlexible.java
@@ -17,4 +17,4 @@ cbed8b6330425a6e8399c889b3f616d8 *java/definitions/SymmetricMatrix.java
 76f4c64cd3f14235470f13ad35081d40 *java/utils/MathUtils.java
 94a4a1a8bb9440caab8addae72a09871 *java/utils/SmartAxis.java
 f33e5e93c1b898bcf247fc2a82d189c8 *man/dendesc.Rd
-4909f240edaa60e770bf3ba5c8f56ce2 *man/linkage.Rd
+f1cb5b79b1ca66ca2c430f080759724c *man/linkage.Rd

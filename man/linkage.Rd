@@ -4,8 +4,8 @@
 \alias{linkage}
 \title{Linkage Methods for Hierarchical Clustering}
 \usage{
-linkage(prox, method = "arithmetic", weighted = FALSE, par.method = 0,
-  digits = NULL)
+linkage(prox, method = "arithmetic", weighted = FALSE,
+  par.method = 0, digits = NULL)
 }
 \arguments{
 \item{prox}{Object of class \code{"\link[stats]{dist}"} containing the lower triangle

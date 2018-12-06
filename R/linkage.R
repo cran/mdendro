@@ -188,6 +188,8 @@ linkage <- function(prox, method = "arithmetic", weighted = FALSE,
     class="multidendrograms/core/definitions/SymmetricMatrix", prox)
   if (is.null(digits)) {
     digits <- rJava::.jcall(obj=jprox, returnSig="I", method="getPrecision")
+  } else {
+  	storage.mode(digits) <- "integer"  # ensure number of digits in integer type
   }
   labls <- labels(prox)
   if (is.null(labls)) {
