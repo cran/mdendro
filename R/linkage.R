@@ -1,315 +1,670 @@
-#' @title
-#' Linkage Methods for Hierarchical Clustering
-#'
-#' @description
-#' Agglomerative hierarchical clustering of a matrix of dissimilarities.
-#'
-#' @param prox
-#'   Object of class \code{"\link[stats]{dist}"} containing the lower triangle
-#'   of a proximity matrix in the form of distances.
-#' @param method
-#'   Character string specifying the linkage method to be used. This should be
-#'   one of: \code{"versatile"}, \code{"single"}, \code{"complete"},
-#'   \code{"arithmetic"} (default), \code{"geometric"}, \code{"harmonic"},
-#'   \code{"ward"}, \code{"centroid"} or \code{"flexible"}. See the
-#'   \emph{Details} section.
-#' @param weighted
-#'   Logical to choose between the weighted and the unweighted (default)
-#'   versions of some clustering methods. Weighted clustering gives merging
-#'   branches in a hierarchical tree equal weight regardless of the number of
-#'   individuals carried on each branch. Such a procedure weights the
-#'   individuals unequally, contrasting with unweighted clustering that gives
-#'   equal weight to each individual in the clusters. This parameter has no
-#'   effect on the \code{"single"}, \code{"complete"} and \code{"ward"}
-#'   linkages.
-#' @param par.method
-#'   A real value in the range [-1, 1] required as parameter for the methods
-#'   \code{"versatile"} and \code{"flexible"}. See the \emph{Details} section.
-#' @param digits
-#'   Integer specifying the precision, i.e. the number of significant decimal
-#'   digits of the data and for the calculations. This is a very important
-#'   parameter, since equal proximity values at a certain precision may become
-#'   different by increasing its value. Thus, it may be responsible of the
-#'   existence of tied distances. The rule should be not to use a precision
-#'   larger than the resolution given by the experimental setup that has
-#'   generated the data. If \code{digits=NULL} (default), then the precision is
-#'   set to that of the data value with the largest number of significant
-#'   decimal digits.
-#'
-#' @details
-#'
-#' Starting from a matrix of dissimilarities, \code{\link{linkage}()} calculates
-#' its dendrogram with the most commonly used agglomerative hierarchical
-#' clustering methods, e.g. single linkage, complete linkage, arithmetic
-#' linkage (also known as average linkage) and Ward's method. You can also
-#' choose between the weighted and the unweighted versions of some clustering
-#' methods, e.g. weighted centroid (WPGMC) and unweighted centroid (UPGMC).
-#' Importantly, it contains a new parameterized method named versatile linkage,
-#' which includes single linkage, complete linkage and average linkage as
-#' particular cases, and which naturally defines two new methods, geometric
-#' linkage and harmonic linkage (hence the convenience to rename average linkage
-#' as arithmetic linkage, to emphasize the existence of different types of
-#' averages).
-#'
-#' The difference between the available hierarchical clustering methods rests in
-#' the way the distance between clusters is defined. During the agglomeration
-#' process, the data items are iteratively joined to form clusters, merging
-#' first the clusters that are at the minimum distance. However, given two
-#' clusters, each one formed by several data observations, there exist many
-#' ways of defining the distance between the clusters from the dissimilarities
-#' between their constituent individuals. Among these linkage methods, we have
-#' the following ones:
-#' \itemize{
-#' \item \code{"single"}: the distance between clusters equals the minimum
-#'   distance between individuals.
-#' \item \code{"complete"}: the distance between clusters equals the maximum
-#'   distance between individuals.
-#' \item \code{"arithmetic"}: the distance between clusters equals the
-#'   arithmetic mean distance between individuals. Also known as average
-#'   linkage, WPGMA (weighted version) or UPGMA (unweighted version).
-#' \item \code{"geometric"}: the distance between clusters equals the
-#'   geometric mean distance between individuals.
-#' \item \code{"harmonic"}: the distance between clusters equals the
-#'   harmonic mean distance between individuals.
-#' \item \code{"versatile"}: the distance between clusters equals the
-#'   generalized power mean distance between individuals. It depends on the
-#'   value of \code{par.method}, with the following linkage methods as
-#'   particular cases: \code{"complete"} (\code{par.method=+1}),
-#'   \code{"arithmetic"} (\code{par.method=+0.1}), \code{"geometric"}
-#'   (\code{par.method=0}), \code{"harmonic"} (\code{par.method=-0.1}) and
-#'   \code{"single"} (\code{par.method=-1}).
-#' \item \code{"ward"}: the distance between clusters is a weighted squared
-#'   Euclidean distance between the centroids of each cluster (Ward, 1963).
-#' \item \code{"centroid"}: the distance between clusters equals the square
-#'   of the Euclidean distance between the centroids of each cluster. Also
-#'   known as WPGMC (weighted version) or UPGMC (unweighted version).
-#' \item \code{"flexible"}: the distance between clusters is a weighted sum
-#'   of the distances between clusters in the previous iteration (Lance and
-#'   Williams, 1967; Belbin \emph{et al.}, 1992). It depends on the value of
-#'   \code{par.method}, and it is equivalent to \code{"arithmetic"} linkage
-#'   when \code{par.method=0}.
-#' }
-#'
-#' Except for the cases containing ties in proximity values as described in the
-#' next paragraph, the following equivalences hold between the
-#' \code{\link{linkage}()} function in this package, the
-#' \code{\link[stats]{hclust}()} function in the \pkg{stats} package, and the
-#' \code{\link[cluster]{agnes}()} function in the \pkg{cluster} package. When
-#' relevant, weighted (\code{W}) or unweighted (\code{U}) versions of the
-#' linkage methods and the values for \code{par.method} (\eqn{\beta}) are
-#' indicated:
-#' \tabular{lll}{
-#'   \code{linkage} \tab \code{hclust} \tab \code{agnes} \cr
-#'   \code{==================} \tab \code{============} \tab
-#'     \code{===================} \cr
-#'   \code{"single"} \tab \code{"single"} \tab \code{"single"} \cr
-#'   \code{"complete"} \tab \code{"complete"} \tab \code{"complete"} \cr
-#'   \code{"arithmetic", U} \tab \code{"average"} \tab \code{"average"} \cr
-#'   \code{"arithmetic", W} \tab \code{"mcquitty"} \tab \code{"weighted"} \cr
-#'   \code{"ward"} \tab \code{"ward.D2"} \tab \code{"ward"} \cr
-#'   \code{"centroid", U} \tab \code{"centroid"} \tab \code{--------} \cr
-#'   \code{"centroid", W} \tab \code{"median"} \tab \code{--------} \cr
-#'   \code{"flexible", U, } \eqn{\beta} \tab \code{--------} \tab
-#'     \code{"gaverage", } \eqn{\beta} \cr
-#'   \code{"flexible", W, } \eqn{\beta} \tab \code{--------} \tab
-#'     \code{"flexible", } \eqn{(1-\beta)/2} \cr
-#' }
-#'
-#' \code{\link{linkage}()} implements the variable-group approach introduced in
-#' Fernandez and Gomez (2008) to solve the non-uniqueness problem found in the
-#' pair-group implementations. This problem arises when two or more minimum
-#' distances between different clusters are equal during the amalgamation
-#' process. The pair-group approach consists in choosing a pair, breaking the
-#' ties between distances, and proceeds in the same way until the final
-#' hierarchical classification is obtained. However, different dendrograms are
-#' possible depending on the criterion used to break the ties (usually a pair is
-#' just chosen at random). The variable-group approach groups more than two
-#' clusters at the same time when ties occur, what always produces a uniquely
-#' determined solution. When there are no ties, the variable-group approach
-#' gives the same results as the pair-group one.
-#'
-#' @return
-#' Returns an object of class \code{"\link[stats]{dendrogram}"}.
-#'
-#' @references
-#'
-#' L. Belbin, D.P. Faith and G.W. Milligan (1992). A comparison of two
-#' approaches to beta-flexible clustering. \emph{Multivariate Behavioral
-#' Research}, 27(3):417-433.
-#'
-#' A. Fernández and S. Gómez (2008). Solving non-uniqueness in agglomerative
-#' hierarchical clustering using multidendrograms. \emph{Journal of
-#' Classification}, 25(1):43-65.
-#'
-#' G.N. Lance and W.T. Williams (1967). A general theory of classificatory
-#' sorting strategies: 1. Hierarchical systems. \emph{The Computer Journal},
-#' 9(4):373-380.
-#'
-#' J.H. Ward (1963). Hierarchical grouping to optimize an objective function.
-#' \emph{Journal of the American Statistical Association}, 58(301):236-244.
-#'
-#' @seealso
-#' \code{\link{dendesc}} for descriptive measures to analyze dendrograms.
-#'
-#' @examples
-#' ## distances between 10 cities in the US
-#' data(UScitiesD)
-#'
-#' ## unweighted arithmetic linkage (UPGMA)
-#' lnk1 <- linkage(UScitiesD, method="arithmetic", weighted=FALSE)
-#' plot(lnk1, main="linkage(arithmetic, U)")
-#'
-#' ## weighted arithmetic linkage (WPGMA)
-#' lnk2 <- linkage(UScitiesD, method="arithmetic", weighted=TRUE)
-#'
-#' ## equivalence with hclust, except for the ordering of the leaves
-#' hcl2 <- as.dendrogram(hclust(UScitiesD, method="mcquitty"))
-#' sum(abs(ultrametric(lnk2) - ultrametric(hcl2)))  # 0
-#' opar <- par(mfrow=c(1, 2))
-#' plot(lnk2, main="linkage(arithmetic, W)")
-#' plot(hcl2, main="hclust(mcquitty)")
-#' par(opar)
-#'
-#' ## unweighted versatile linkage, with par.method=-0.6
-#' lnk3 <- linkage(UScitiesD, method="versatile", weighted=FALSE,
-#'                 par.method=-0.6)
-#' plot(lnk3, main="linkage(versatile, -0.6, U)")
-#'
-#' ## cophenetic correlation coefficient
-#' cor(UScitiesD, ultrametric(lnk1))  # 0.8101937
-#' cor(UScitiesD, ultrametric(lnk2))  # 0.8076422
-#' cor(UScitiesD, ultrametric(lnk3))  # 0.8163286
-#'
-#' @export
-linkage <- function(prox, method = "arithmetic", weighted = FALSE,
-                    par.method = 0.0, digits = NULL) {
-  storage.mode(prox) <- "double"  # ensure proximity values in double type
-  jprox <- rJava::.jnew(
-    class="multidendrograms/core/definitions/SymmetricMatrix", prox)
+TYPES.PROX <- c("distance", "similarity")
+METHODS <- c("arithmetic", "single", "complete", "geometric", "harmonic",
+    "versatile", "ward", "centroid", "flexible")
+GROUPS <- c("variable", "pair")
+MEASURES <- c("cor", "sdr", "ac", "cc", "tb")
+
+linkage <- function(prox, type.prox = "distance", digits = NULL,
+    method = "arithmetic", par.method = 0, weighted = FALSE, group = "variable")
+{
+  # Check parameters
+  if (class(prox) != "dist") {
+    stop("'prox' must be an object of class \"dist\"")
+  }
+  if (attr(prox, "Size") < 2L) {
+    stop("'prox' must have at least 2 objects to cluster")
+  }
+  if (anyNA(prox)) {
+    stop("NA-values in 'prox' not allowed")
+  }
+  storage.mode(prox) <- "double"
+  type.prox <- match.arg(type.prox, TYPES.PROX)
+  if ((type.prox == "distance") && (min(prox) < 0)) {
+    stop("Distance data must be non-negative")
+  } else if ((type.prox == "similarity") && ((min(prox) < 0)
+      || (1 < max(prox)))) {
+    stop("Similarity data must be between 0 and 1")
+  }
   if (is.null(digits)) {
-    digits <- rJava::.jcall(obj=jprox, returnSig="I", method="getPrecision")
-  } else {
-  	storage.mode(digits) <- "integer"  # ensure number of digits in integer type
+    digits <- -1L
   }
-  labls <- labels(prox)
-  if (is.null(labls)) {
-  	members <- attr(prox, which="Size")
-  	labls <- as.character(1:members)  # assign default labels
+  method <- match.arg(method, METHODS)
+  if (((method == "geometric") || (method == "harmonic")
+      || ((method == "versatile") && (par.method <= 0))) && (min(prox) < 0)) {
+    stop(paste("'versatile' with negative parameter, 'geometric' and",
+        " 'harmonic' cannot be used with negative data", sep=""))
   }
-  dbased <- TRUE
-  if (method == "versatile") {
-    pw <- invsigmoid(par.method)
-    hc <- 
-      rJava::.jnew(class="multidendrograms/core/clusterings/VersatileLinkage",
-      jprox, labls, dbased, digits, weighted, pw)
-  } else if (method == "single") {
-    hc <- rJava::.jnew(class="multidendrograms/core/clusterings/SingleLinkage",
-      jprox, labls, dbased, digits)
-  } else if (method == "complete") {
-    hc <- 
-      rJava::.jnew(class="multidendrograms/core/clusterings/CompleteLinkage",
-      jprox, labls, dbased, digits)
-  } else if (method == "arithmetic") {
-    pw <- +1.0
-    hc <- 
-      rJava::.jnew(class="multidendrograms/core/clusterings/VersatileLinkage",
-      jprox, labls, dbased, digits, weighted, pw)
-  } else if (method == "geometric") {
-    pw <- 0.0
-    hc <- 
-      rJava::.jnew(class="multidendrograms/core/clusterings/VersatileLinkage",
-      jprox, labls, dbased, digits, weighted, pw)
-  } else if (method == "harmonic") {
-    pw <- -1.0
-    hc <- 
-      rJava::.jnew(class="multidendrograms/core/clusterings/VersatileLinkage",
-      jprox, labls, dbased, digits, weighted, pw)
-  } else if (method == "centroid") {
-    hc <- rJava::.jnew(class="multidendrograms/core/clusterings/Centroid",
-      jprox, labls, dbased, digits, weighted)
-  } else if (method == "ward") {
-    hc <- rJava::.jnew(class="multidendrograms/core/clusterings/Ward",
-      jprox, labls, dbased, digits)
-  } else if (method == "flexible") {
-    hc <- rJava::.jnew(class="multidendrograms/core/clusterings/BetaFlexible",
-      jprox, labls, dbased, digits, weighted, par.method)
+  if (((method == "ward") || (method == "centroid"))
+      && (type.prox == "similarity")) {
+    stop("'ward' and 'centroid' cannot be used with similarity data")
   }
-  rJava::.jcall(obj=hc, returnSig="V", method="build")
-  jdendro <- rJava::.jcall(obj=hc, 
-    returnSig="Lmultidendrograms/core/definitions/Dendrogram;",
-    method="getRoot")
-  dendro <- asdendrogram(jdendro)
-  return(dendro)
-}
-
-invsigmoid <- function(y) {
-  y1 <- 0.1
-  return(ifelse(y <= -1, -Inf,
-         ifelse(y >= +1, +Inf,
-                         log((1 + y) / (1 - y)) / log((1 + y1) / (1 - y1)))))
-}
-
-asdendrogram <- function(jdendro) {
-  uniform.origin <- TRUE
-  sa <- rJava::.jnew(class="multidendrograms/core/utils/SmartAxis", jdendro,
-    uniform.origin)
-  dbased <- rJava::.jfield(o=jdendro, sig="Z", name="isDistanceBased")
-  if (dbased) {
-    bottom <- rJava::.jcall(obj=sa, returnSig="D", method="smartMin")
-  } else {
-    bottom <- rJava::.jcall(obj=sa, returnSig="D", method="smartMax")
+  if ((method == "flexible") && ((par.method < -1) || (+1 < par.method))) {
+    stop("'par.method' for 'flexible' must be between -1 and +1")
   }
-  dendro <- list()
-  dendro <- recdendrogram(dendro, ancestors=c(), jdendro, bottom)
-  class(dendro) <- "dendrogram"
-  return(dendro)
-}
-
-recdendrogram <- function(dendro, ancestors, jdendro, bottom) {
-  membrs <- as.integer(rJava::.jcall(obj=jdendro, returnSig="I", 
-    method="numberOfLeaves"))
-  nsubdendros <- rJava::.jcall(obj=jdendro, returnSig="I", 
-    method="numberOfSubclusters")
-  if (nsubdendros == 1) {
-    id <- rJava::.jcall(obj=jdendro, returnSig="I", method="getIdentifier")
-    labl <- rJava::.jcall(obj=jdendro, returnSig="S", method="getLabel")
-    if (is.null(ancestors)) {
-      attributes(dendro) <- list(members=membrs, height=bottom, midpoint=0,
-        label=labl, leaf=TRUE)
-    } else {
-      dendro[[ancestors]] <- as.vector(id)
-      attributes(dendro[[ancestors]]) <- list(members=membrs, height=bottom,
-        midpoint=0, label=labl, leaf=TRUE)
+  group <- match.arg(group, GROUPS)
+  # Build agglomerative hierarchical clustering
+  lnk <- rcppLinkage(prox=prox, isDistance=(type.prox == "distance"),
+      digits=digits, method=method, methodPar=par.method,
+      isWeighted=as.logical(weighted), isVariable=(group == "variable"))
+  # Permute the original observations
+  ord <- integer(attr(prox, "Size"))
+  jOrd <- 0L
+  stack <- length(lnk$height)
+  while (length(stack) > 0L) {
+    top <- stack[1L]
+    stack <- stack[-1L]
+    if (top < 0L) {  # leaf
+      jOrd <- jOrd + 1L
+      ord[jOrd] <- -top
+    } else {  # inner node
+      children <- c()
+      m <- lnk$merger[[top]]
+      nClusters <- length(m)
+      for (i in 1L : nClusters) {
+        children <- c(children, m[i])
+      }
+      stack <- c(children, stack)
     }
-  } else {
-    lastchild <- 0
-    for (n in 1:nsubdendros) {
-      subd <- rJava::.jcall(obj=jdendro, 
-        returnSig="Lmultidendrograms/core/definitions/Dendrogram;", 
-        method="getSubcluster", as.integer(n-1))
-      dendro[[c(ancestors, n)]] <- list()
-      dendro <- recdendrogram(dendro, c(ancestors, n), subd, bottom)
-      if (n == 1) {
-        firstchild <- attr(dendro[[c(ancestors, n)]], which="midpoint")
-        lastchild <- lastchild + rJava::.jcall(obj=subd, returnSig="I", 
-          method="numberOfLeaves")
-      } else if (n == nsubdendros) {
-        lastchild <- lastchild + 
-          attr(dendro[[c(ancestors, n)]], which="midpoint")
-      } else {
-        lastchild <- lastchild + 
-          rJava::.jcall(obj=subd, returnSig="I", method="numberOfLeaves")
+  }
+  # Set attributes for cophenetic matrix
+  attr(lnk$coph, "Labels") <- attr(prox, "Labels")
+  attr(lnk$coph, "Size") <- attr(prox, "Size")
+  attr(lnk$coph, "call") <- match.call()
+  attr(lnk$coph, "Diag") <- FALSE
+  attr(lnk$coph, "Upper") <- FALSE
+  class(lnk$coph) <- "dist"
+  # Return object of class "linkage"
+  structure(list(
+      call = match.call(),
+      digits = lnk$digits,
+      merger = lnk$merger,
+      height = lnk$height,
+      range = lnk$range,
+	  order = ord,
+      coph = lnk$coph,
+      cor = lnk$cor,
+      sdr = lnk$sdr,
+      ac = lnk$ac,
+      cc = lnk$cc,
+      tb = lnk$tb),
+    class = "linkage")
+}
+
+descplot <- function(prox, ..., type.prox = "distance", digits = NULL,
+    method = "versatile", par.method = c(-1,0,+1), weighted = FALSE,
+    group = "variable", measure = "cor", slope = 10)
+{
+  method <- match.arg(method, c("versatile", "flexible"))
+  measure <- match.arg(measure, MEASURES)
+  if (slope <= 0) {
+    stop("'slope' must be a positive number")
+  }
+  y <- numeric(length(par.method))
+  for (i in seq_along(par.method)) {
+    lnk <- linkage(prox, type.prox=type.prox, digits=digits, method=method,
+        par.method=par.method[i], weighted=weighted, group=group)
+    y[i] <- lnk[[measure]]
+  }
+  if (method == "flexible") {
+    plot(x=par.method, y=y, ylab=measure, xlab="par.method", ...)
+  } else {  # (method == "versatile")
+    x <- tanh(par.method / slope)
+    plot(x=x, y=y, ylab=measure, xlab="par.method", xaxt="n", ...)
+    axis(side=1, at=x, labels=par.method)
+  }
+}
+
+summary.linkage <- function(object, ...) {
+  # Print call
+  cl <- object$call
+  cat(deparse(cl[[1L]]), "(prox = ", deparse(cl$prox), ",\n", sep="")
+  type.prox <- match.arg(cl$type.prox, TYPES.PROX)
+  cat("        type.prox = \"", type.prox, "\",\n", sep="")
+  cat("        digits = ", object$digits, ",\n", sep="")
+  method <- match.arg(cl$method, METHODS)
+  cat("        method = \"", method, "\",\n", sep="")
+  if ((method == "versatile") || (method == "flexible")) {
+    par.method <- if (is.null(cl$par.method)) "0" else deparse(cl$par.method)
+    cat("        par.method = ", par.method, ",\n", sep="")
+  }
+  if ((method != "single") && (method != "complete")) {
+    weighted <- if (is.null(cl$weighted)) "FALSE" else deparse(cl$weighted)
+    cat("        weighted = ", as.logical(weighted), ",\n", sep="")
+  }
+  group <- match.arg(cl$group, GROUPS)
+  cat("        group = \"", group, "\")\n\n", sep="")
+  # Print measures
+  print(c(cor = object$cor, sdr = object$sdr, ac = object$ac, cc = object$cc,
+      tb = object$tb), ...)
+  invisible(object)
+}
+
+cophenetic.linkage <- function(x) {
+  x$coph
+}
+
+as.hclust.linkage <- function(x, ...) {
+  size <- attr(x$coph, "Size")
+  mrg <- matrix(nrow=size-1L, ncol=2L)
+  storage.mode(mrg) <- "integer"
+  hgt <- numeric(size-1L)
+  nMergers <- length(x$height)
+  ties <- rep.int(0L, times=nMergers)  # number of ties before each merger
+  for (k in 1L : nMergers) {
+    m <- x$merger[[k]]
+    kties <- k + ties[k]
+    mrg[kties,1L] <- if (m[1L] < 0L) m[1L] else m[1L] + ties[m[1L]]
+    mrg[kties,2L] <- if (m[2L] < 0L) m[2L] else m[2L] + ties[m[2L]]
+    hgt[kties] <- x$height[k]
+    nClusters <- length(m)
+    for (i in seq_len(nClusters - 2L)) {
+      mrg[kties+i,1L] <- kties + i - 1L
+      mrg[kties+i,2L] <- if (m[i+2L] < 0L) m[i+2L] else m[i+2L] + ties[m[i+2L]]
+      hgt[kties+i] <- x$height[k]
+    }
+    if (nClusters > 2L) {
+      for (kk in k : nMergers) {
+        ties[kk] <- ties[kk] + nClusters - 2L
       }
     }
-    hght <- rJava::.jcall(obj=jdendro, returnSig="D",
-      method="getRootBottomHeight")
-    midpnt <- (firstchild + lastchild) / 2
-    if (is.null(ancestors)) {
-      attributes(dendro) <- list(members=membrs, height=hght, midpoint=midpnt)
-    } else {
-      attributes(dendro[[ancestors]]) <- 
-        list(members=membrs, height=hght, midpoint=midpnt)
+  }
+  structure(list(
+      merge = mrg,
+      height = hgt,
+      order = x$order,
+      labels = attr(x$coph, "Labels"),
+      method = match.arg(x$call$method, METHODS),
+      call = x$call,
+      dist.method = NULL),
+    class = "hclust")
+}
+
+as.dendrogram.linkage <- function(object, ...) {
+  labels <- attr(object$coph, "Labels")
+  if (is.null(labels)) {
+    size <- attr(object$coph, "Size")
+    labels <- as.character(seq_len(size))
+  }
+  type.prox <- match.arg(object$call$type.prox, TYPES.PROX)
+  hBottom <- if (type.prox == "distance") 0 else 1
+  z <- list()
+  nMergers <- length(object$height)
+  ties <- rep.int(0L, times=nMergers)  # number of ties before each merger
+  for (k in 1L : nMergers) {
+    x <- object$merger[[k]]
+    kties <- k + ties[k]
+    zk <- list()
+    if (x[1L] < 0L) {  # leaf
+      fstPoint <- 0
+      zk[[1L]] <- -x[1L]
+      attr(zk[[1L]], "label") <- labels[-x[1L]]
+      attr(zk[[1L]], "members") <- 1L
+      attr(zk[[1L]], "height") <- hBottom
+      attr(zk[[1L]], "leaf") <- TRUE
+    } else {  # inner node
+      fstPoint <- attr(z[[as.character(x[1L])]], "midpoint")
+      zk[[1L]] <- z[[as.character(x[1L])]]
+      z[[as.character(x[1L])]] <- NULL
+    }
+    nMembers <- attr(zk[[1L]], "members")
+    if (x[2L] < 0L) {  # leaf
+      lstPoint <- 0
+      zk[[2L]] <- -x[2L]
+      attr(zk[[2L]], "label") <- labels[-x[2L]]
+      attr(zk[[2L]], "members") <- 1L
+      attr(zk[[2L]], "height") <- hBottom
+      attr(zk[[2L]], "leaf") <- TRUE
+    } else {  # inner node
+      lstPoint <- attr(z[[as.character(x[2L])]], "midpoint")
+      zk[[2L]] <- z[[as.character(x[2L])]]
+      z[[as.character(x[2L])]] <- NULL
+    }
+    prevMembers <- nMembers
+    nMembers <- nMembers + attr(zk[[2L]], "members")
+    attr(zk, "members") <- nMembers
+    attr(zk, "midpoint") <- (fstPoint + prevMembers + lstPoint) / 2
+    attr(zk, "height") <- object$height[k]
+    z[[as.character(k)]] <- zk
+    nClusters <- length(x)
+    for (i in seq_len(nClusters - 2L)) {
+      zk <- list()
+      zk[[1L]] <- z[[as.character(k)]]
+      z[[as.character(k)]] <- NULL
+      if (x[i+2L] < 0L) {  # leaf
+        lstPoint <- 0
+        zk[[2L]] <- -x[i+2L]
+        attr(zk[[2L]], "label") <- labels[-x[i+2L]]
+        attr(zk[[2L]], "members") <- 1L
+        attr(zk[[2L]], "height") <- hBottom
+        attr(zk[[2L]], "leaf") <- TRUE
+      } else {  # inner node
+        lstPoint <- attr(z[[as.character(x[i+2L])]], "midpoint")
+        zk[[2L]] <- z[[as.character(x[i+2L])]]
+        z[[as.character(x[i+2L])]] <- NULL
+      }
+      prevMembers <- nMembers
+      nMembers <- nMembers + attr(zk[[2L]], "members")
+      attr(zk, "members") <- nMembers
+      attr(zk, "midpoint") <- (fstPoint + prevMembers + lstPoint) / 2
+      attr(zk, "height") <- object$height[k]
+      z[[as.character(k)]] <- zk
+    }
+    if (nClusters > 2L) {
+      for (kk in k : nMergers) {
+        ties[kk] <- ties[kk] + nClusters - 2L
+      }
     }
   }
-  return(dendro)
+  structure(z[[as.character(nMergers)]], class = "dendrogram")
+}
+
+as.multidendrogram <- function(object) {
+  labels <- attr(object$coph, "Labels")
+  if (is.null(labels)) {
+    size <- attr(object$coph, "Size")
+    labels <- as.character(seq_len(size))
+  }
+  type.prox <- match.arg(object$call$type.prox, TYPES.PROX)
+  hBottom <- if (type.prox == "distance") 0 else 1
+  z <- list()
+  nMergers <- length(object$height)
+  for (k in 1L : nMergers) {
+    x <- object$merger[[k]]
+    zk <- list()
+    nMembers <- 0L
+    nClusters <- length(x)
+    if (x[1L] < 0L) {  # leaf
+      fstPoint <- 0
+    } else {  # inner node
+      fstPoint <- attr(z[[as.character(x[1L])]], "midpoint")
+    }
+    if (x[nClusters] < 0L) {  # leaf
+      lstPoint <- 0
+    } else {  # inner node
+      lstPoint <- attr(z[[as.character(x[nClusters])]], "midpoint")
+    }
+    for (i in 1L : nClusters) {
+      if (x[i] < 0L) {  # leaf
+        zk[[i]] <- -x[i]
+        attr(zk[[i]], "label") <- labels[-x[i]]
+        attr(zk[[i]], "members") <- 1L
+        attr(zk[[i]], "height") <- hBottom
+        attr(zk[[i]], "leaf") <- TRUE
+      } else {  # inner node
+        zk[[i]] <- z[[as.character(x[i])]]
+        z[[as.character(x[i])]] <- NULL
+      }
+      prevMembers <- nMembers
+      nMembers <- nMembers + attr(zk[[i]], "members")
+    }
+    attr(zk, "members") <- nMembers
+    attr(zk, "midpoint") <- (fstPoint + prevMembers + lstPoint) / 2
+    attr(zk, "height") <- object$height[k]
+    attr(zk, "range") <- object$range[k]
+    z[[as.character(k)]] <- zk
+  }
+  structure(z[[as.character(nMergers)]], class = "dendrogram")
+}
+
+plot.linkage <- function (x, type = c("rectangle", "triangle"), center = FALSE,
+    edge.root = FALSE,
+    nodePar = NULL, edgePar = list(),
+    leaflab = c("perpendicular", "textlike", "none"), dLeaf = NULL,
+    xlab = "", ylab = "", xaxt = "n", yaxt = "s",
+    horiz = FALSE, frame.plot = FALSE, xlim, ylim,
+    col.rng = "lightgray", ...)
+{
+  xd <- as.multidendrogram(x)
+  type <- match.arg(type)
+  if (type == "triangle") {
+    col.rng <- NULL
+  }
+  leaflab <- match.arg(leaflab)
+  hgt <- attr(xd, "height")
+  type.prox <- match.arg(x$call$type.prox, TYPES.PROX)
+  yBot <- if (type.prox == "distance") 0 else 1
+  if (edge.root && is.logical(edge.root)) {
+    edge.root <- 0.0625 * (if (stats::is.leaf(xd)) 1 else abs(hgt - yBot))
+  }
+  mem.xd <- .memberDend(xd)
+  yTop <- if (type.prox == "distance") hgt + edge.root else hgt - edge.root
+  hgtTop <- .hgtDend(xd, type.prox=type.prox, col.rng=col.rng)
+  if (center) {
+    x1 <- 0.5 ; x2 <- mem.xd + 0.5
+  } else {
+    x1 <- 1   ; x2 <- mem.xd
+  }
+  xl. <- c(x1 - 1/2, x2 + 1/2)
+  yl. <- c(yBot,
+      if (type.prox == "distance") max(yTop, hgtTop) else min(yTop, hgtTop))
+  if (horiz) {## swap and reverse direction on `x':
+    tmp <- xl.; xl. <- rev(yl.); yl. <- tmp
+    tmp <- xaxt; xaxt <- yaxt; yaxt <- tmp
+  }
+  if (missing(xlim) || is.null(xlim)) xlim <- xl.
+  if (missing(ylim) || is.null(ylim)) ylim <- yl.
+  grDevices::dev.hold(); on.exit(grDevices::dev.flush())
+  plot(0, xlim=xlim, ylim=ylim, type="n", xlab=xlab, ylab=ylab,
+      xaxt=xaxt, yaxt=yaxt, frame.plot=frame.plot, ...)
+  if (is.null(dLeaf)) {
+    dLeaf <- 0.75 *
+        (if (horiz) graphics::strwidth("w") else graphics::strheight("x"))
+  }
+
+  if (edge.root) {
+### FIXME: the first edge + edgetext is drawn here, all others in plotNode()
+### -----  maybe use trick with adding a single parent node to the top ?
+    x0 <- plotNodeLimit(x1, x2, xd, center)$x
+    if (horiz) {
+      graphics::segments(hgt, x0, yTop, x0)
+    } else {
+      graphics::segments(x0, hgt, x0, yTop)
+    }
+    if (!is.null(et <- attr(xd, "edgetext"))) {
+      my <- mean(hgt, yTop)
+      if (horiz) graphics::text(my, x0, et) else graphics::text(x0, my, et)
+    }
+  }
+  plotNode(x1, x2, xd, type.prox=type.prox, type=type, center=center,
+      leaflab=leaflab, dLeaf=dLeaf, nodePar=nodePar, edgePar=edgePar,
+      horiz=horiz, col.rng=col.rng)
+}
+
+.memberDend <- function(x) {
+  r <- attr(x, "x.member")
+  if (is.null(r)) {
+    r <- attr(x, "members")
+    if (is.null(r)) r <- 1L
+  }
+  r
+}
+
+.hgtDend <- function(node, type.prox, col.rng) {
+  hgt <- attr(node, "height")
+  if (!stats::is.leaf(node)) {
+    rng <- if (is.null(col.rng)) 0 else attr(node, "range")
+    hgt <- if (type.prox == "distance") hgt + rng else hgt - rng
+    todo <- NULL # Non-leaf nodes to traverse after this one.
+    repeat {
+      ## For each child: count and add to todo list if it is not a leaf.
+      while (length(node)) {
+        child <- node[[1L]]
+        node <- node[-1L]
+        if (stats::is.leaf(child) || is.null(col.rng)) {
+          rng <- 0
+        } else {
+          rng <- attr(child, "range")
+        }
+        chldHgt <- attr(child, "height")
+        if (type.prox == "distance") {
+          hgt <- max(hgt, chldHgt + rng)
+        } else { # (type.prox == "similarity")
+          hgt <- min(hgt, chldHgt - rng)
+        }
+        if (!stats::is.leaf(child)) {
+          todo <- list(node=child, todo=todo)
+        }
+      }
+      ## Advance to next node, terminating when no nodes left.
+      if (is.null(todo)) {
+        break
+      } else {
+        node <- todo$node
+        todo <- todo$todo
+      }
+    }
+  }
+  hgt
+}
+
+### the work horse: plot node (if pch) and lines to all children
+plotNode <- function(x1, x2, subtree, type.prox, type, center, leaflab, dLeaf,
+    nodePar, edgePar, horiz = FALSE, col.rng)
+{
+  wholetree <- subtree
+  depth <- 0L
+  llimit <- list()
+  KK <- integer()
+  kk <- integer()
+
+  repeat {
+    inner <- !stats::is.leaf(subtree) && (x1 != x2)
+    yTop <- attr(subtree, "height")
+    yRng <- if (is.null(col.rng)) 0 else attr(subtree, "range")
+    bx <- plotNodeLimit(x1, x2, subtree, center)
+    xTop <- bx$x
+    depth <- depth + 1L
+    llimit[[depth]] <- bx$limit
+
+    ## handle node specific parameters in "nodePar":
+    nPar <- attr(subtree, "nodePar")
+    hasP <- !is.null(nPar)
+    if (!hasP) nPar <- nodePar
+
+    if (getOption("verbose")) {
+      cat(if (inner) "inner node" else "leaf", ":")
+      if (!is.null(nPar)) {
+        cat(" with node pars\n"); utils::str(nPar)
+      }
+      cat(if (inner ) paste(" height", formatC(yTop), "; "), "(x1,x2)= (",
+          formatC(x1, width=4), ",", formatC(x2, width=4), ")",
+          "--> xTop=", formatC(xTop, width=8), "\n", sep="")
+    }
+
+    Xtract <- function(nam, L, default, indx) {
+      rep(if (nam %in% names(L)) L[[nam]] else default, length.out=indx)[indx]
+    }
+    asTxt <- function(x) { # to allow 'plotmath' labels:
+      if (is.character(x) || is.expression(x) || is.null(x)) {
+        x
+      } else {
+        as.character(x)
+      }
+    }
+
+    i <- if (inner || hasP) 1 else 2 # only 1 node specific par
+
+    if (!is.null(nPar)) { ## draw this node
+      pch <- Xtract("pch", nPar, default=1L:2, i)
+      cex <- Xtract("cex", nPar, default=c(1,1), i)
+      col <- Xtract("col", nPar, default=graphics::par("col"), i)
+      bg <- Xtract("bg", nPar, default=graphics::par("bg"), i)
+      graphics::points(if (horiz) cbind(yTop, xTop) else cbind(xTop, yTop),
+          pch=pch, bg=bg, col=col, cex=cex)
+    }
+
+    if (leaflab == "textlike") {
+      p.col <- Xtract("p.col", nPar, default="white", i)
+    }
+    lab.col <- Xtract("lab.col", nPar, default=graphics::par("col"), i)
+    lab.cex <- Xtract("lab.cex", nPar, default=c(1,1), i)
+    lab.font <- Xtract("lab.font", nPar, default=graphics::par("font"), i)
+    lab.xpd <- Xtract("xpd", nPar, default=c(TRUE,TRUE), i)
+    if (stats::is.leaf(subtree)) {
+      ## label leaf
+      if (leaflab == "perpendicular") { # somewhat like plot.hclust
+        if (horiz) {
+          X <- yTop + dLeaf * lab.cex
+          Y <- xTop; srt <- 0; adj <- c(0, 0.5)
+        } else {
+          Y <- yTop - dLeaf * lab.cex
+          X <- xTop; srt <- 90; adj <- 1
+        }
+        nodeText <- asTxt(attr(subtree, "label"))
+        graphics::text(X, Y, nodeText, xpd=lab.xpd, srt=srt, adj=adj,
+            cex=lab.cex, col=lab.col, font=lab.font)
+      }
+    } else if (inner) {
+      segmentsHV <- function(x0, y0, x1, y1) {
+        if (horiz) {
+          graphics::segments(y0, x0, y1, x1, col=col, lty=lty, lwd=lwd)
+        } else {
+          graphics::segments(x0, y0, x1, y1, col=col, lty=lty, lwd=lwd)
+        }
+      }
+      rectHV <- function(x0, y0, x1, y1, col.rng) {
+        if (horiz) {
+          graphics::rect(y0, x0, y1, x1, col=col.rng, lty=lty, lwd=lwd)
+        } else {
+          graphics::rect(x0, y0, x1, y1, col=col.rng, lty=lty, lwd=lwd)
+        }
+      }
+      if (type == "rectangle") {
+        k1 <- 1L
+        k2 <- length(subtree)
+        child1 <- subtree[[k1]]
+        child2 <- subtree[[k2]]
+        hasE <- !is.null(ePar <- attr(child1, "edgePar"))
+        if (!hasE) {
+          ePar <- edgePar
+        }
+        i <- if (!stats::is.leaf(child1) || hasE) 1 else 2
+        ## define line attributes for rectHV():
+        col <- Xtract("col", ePar, default=graphics::par("col"), i)
+        lty <- Xtract("lty", ePar, default=graphics::par("lty"), i)
+        lwd <- Xtract("lwd", ePar, default=graphics::par("lwd"), i)
+        xk1 <- if (center) mean(bx$limit[k1:(k1 + 1L)])
+               else bx$limit[k1] + .midDend(child1)
+        xk2 <- if (center) mean(bx$limit[k2:(k2 + 1L)])
+               else bx$limit[k2] + .midDend(child2)
+        rectHV(xk1, yTop, xk2,
+            if (type.prox == "distance") yTop+yRng else yTop-yRng, col.rng) # h
+      }
+      for (k in seq_along(subtree)) {
+        child <- subtree[[k]]
+        ## draw lines to the children and draw them recursively
+        yBot <- attr(child, "height")
+        if (getOption("verbose")) {
+          cat("ch.", k, "@ h=", yBot, "; ")
+        }
+        if (is.null(yBot)) {
+          yBot <- 0
+        }
+        xBot <- if (center) mean(bx$limit[k:(k + 1)])
+                else bx$limit[k] + .midDend(child)
+
+        ePar <- attr(child, "edgePar")
+        hasE <- !is.null(ePar)
+        if (!hasE) {
+          ePar <- edgePar
+        }
+        i <- if (!stats::is.leaf(child) || hasE) 1 else 2
+        ## define line attributes for segmentsHV():
+        col <- Xtract("col", ePar, default=graphics::par("col"), i)
+        lty <- Xtract("lty", ePar, default=graphics::par("lty"), i)
+        lwd <- Xtract("lwd", ePar, default=graphics::par("lwd"), i)
+        if (type == "triangle") {
+          segmentsHV(xTop, yTop, xBot, yBot)
+        } else { # rectangle
+          segmentsHV(xBot, yTop, xBot, yBot) # v
+        }
+        vln <- NULL
+        if (stats::is.leaf(child) && (leaflab == "textlike")) {
+          nodeText <- asTxt(attr(child, "label"))
+          if (getOption("verbose")) {
+            cat('-- with "label"', format(nodeText))
+          }
+          hln <- 0.6 * graphics::strwidth(nodeText, cex=lab.cex) / 2
+          vln <- 1.5 * graphics::strheight(nodeText, cex=lab.cex) / 2
+          graphics::rect(xBot-hln, yBot, xBot+hln, yBot+2*vln, col=p.col)
+          graphics::text(xBot, yBot+vln, nodeText, xpd=lab.xpd, cex=lab.cex,
+              col=lab.col, font=lab.font)
+        }
+        if (!is.null(attr(child, "edgetext"))) {
+          edgeText <- asTxt(attr(child, "edgetext"))
+          if (getOption("verbose")) {
+            cat('-- with "edgetext"', format(edgeText))
+          }
+          if (!is.null(vln)) {
+            mx <-
+                if (type == "triangle")
+                  (xTop+xBot+((xTop-xBot)/(yTop-yBot))*vln)/2
+                else xBot
+            my <- (yTop+yBot+2*vln)/2
+          } else {
+            mx <- if (type == "triangle") (xTop+xBot)/2 else xBot
+            my <- (yTop+yBot)/2
+          }
+          ## Both for "triangle" and "rectangle" : Diamond + Text
+
+          p.col <- Xtract("p.col", ePar, default="white", i)
+          p.border <- Xtract("p.border", ePar, default=graphics::par("fg"), i)
+          ## edge label pars: defaults from the segments pars
+          p.lwd <- Xtract("p.lwd", ePar, default=lwd, i)
+          p.lty <- Xtract("p.lty", ePar, default=lty, i)
+          t.col <- Xtract("t.col", ePar, default=col, i)
+          t.cex <- Xtract("t.cex", ePar, default=1, i)
+          t.font <- Xtract("t.font", ePar, default=graphics::par("font"), i)
+
+          vlm <- graphics::strheight(c(edgeText, "h"), cex=t.cex) / 2
+          hlm <- graphics::strwidth(c(edgeText, "m"), cex=t.cex) / 2
+          hl3 <- c(hlm[1L], hlm[1L]+hlm[2L], hlm[1L])
+          if (horiz) {
+            graphics::polygon(my+c(-hl3, hl3), mx+sum(vlm)*c(-1L:1L, 1L:-1L),
+                col=p.col, border=p.border, lty=p.lty, lwd=p.lwd)
+            graphics::text(my, mx, edgeText, cex=t.cex, col=t.col, font=t.font)
+          } else {
+            graphics::polygon(mx+c(-hl3, hl3), my+sum(vlm)*c(-1L:1L, 1L:-1L),
+                col=p.col, border=p.border, lty=p.lty, lwd=p.lwd)
+            graphics::text(mx, my, edgeText, cex=t.cex, col=t.col, font=t.font)
+          }
+        }
+      }
+    }
+
+    if (inner && length(subtree)) {
+      KK[depth] <- length(subtree)
+      if (storage.mode(kk) != storage.mode(KK)) {
+        storage.mode(kk) <- storage.mode(KK)
+      }
+
+      ## go to first child
+      kk[depth] <- 1L
+      x1 <- bx$limit[1L]
+      x2 <- bx$limit[2L]
+      subtree <- subtree[[1L]]
+    } else {
+      repeat {
+        depth <- depth - 1L
+        if (!depth || (kk[depth] < KK[depth])) break
+      }
+      if (!depth) break
+      length(kk) <- depth
+      kk[depth] <- k <- kk[depth] + 1L
+      x1 <- llimit[[depth]][k]
+      x2 <- llimit[[depth]][k+1L]
+      subtree <- wholetree[[kk]]
+    }
+  } ## repeat
+  invisible()
+}
+
+plotNodeLimit <- function(x1, x2, subtree, center) {
+  ## get the left borders limit[k] of all children k=1..K, and
+  ## the handle point `x' for the edge connecting to the parent.
+  inner <- !stats::is.leaf(subtree) && (x1 != x2)
+  limit <- c(x1,
+      if (inner) {
+        K <- length(subtree)
+        mTop <- .memberDend(subtree)
+        limit <- integer(K)
+        xx1 <- x1
+        for (k in 1L : K) {
+          m <- .memberDend(subtree[[k]])
+          ## if(is.null(m)) m <- 1
+          xx1 <- xx1 + (if (center) (x2-x1)*m/mTop else m)
+          limit[k] <- xx1
+        }
+        limit
+      } else { ## leaf
+        x2
+      })
+  mid <- attr(subtree, "midpoint")
+  center <- center || (inner && !is.numeric(mid))
+  x <- if (center) mean(c(x1,x2)) else x1 + (if (inner) mid else 0)
+  list(x = x, limit = limit)
+}
+
+.midDend <- function(x) {
+  if (is.null(mp <- attr(x, "midpoint"))) 0 else mp
 }
