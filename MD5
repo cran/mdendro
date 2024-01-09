@@ -1,13 +1,13 @@
-0b31cbb226c9bbe1144b6a96f1b79e12 *DESCRIPTION
-d1266c80787ce5ec15c73ebd84eda154 *NAMESPACE
+7f2a60eb20a0cde9ab37d241fa7b6d5c *DESCRIPTION
+d22065baa7f46b3804c03a382eb8cb75 *NAMESPACE
 9e98f2d52fed5c92c8c085c135ecac4d *R/RcppExports.R
-08558f6c1cfc49b6515e24fdd4da2f56 *R/linkage.R
-3e28de1f895537e8aa8ccf5836bfb1eb *build/vignette.rds
+cc7386d5e8f41109c4e46d5485a90c0e *R/linkage.R
+58fdbb828c05d9e09618dea9f2a23495 *build/vignette.rds
 8565afed5f819d3e4bbff39dd656718b *inst/CITATION
-a76e90872e073bce749e0f107206f597 *inst/doc/Introduction.R
-832d41df8b008dea42cbac5e6bffb11b *inst/doc/Introduction.Rmd
-51b8f6252c56ea372fc792b47164810a *inst/doc/Introduction.html
-13ad8c6702ec4b2a08b6563ed8e6a445 *man/linkage.Rd
+52ab43c91c01b3912a529646f7ecfe1a *inst/doc/Introduction.R
+c5a1920818b27d750b29893235824dd6 *inst/doc/Introduction.Rmd
+acbccfa3ed9d757ff1015072cd5cf593 *inst/doc/Introduction.html
+a2a4de01eaab6e403698f348ba707b2c *man/linkage.Rd
 c7132eb08a21101623529f6b0cc3a847 *man/plot.linkage.Rd
 1227355b5a2ba942b6dfa4dd3742e9e5 *src/Arithmetic.cpp
 44e2dc104bbe212301e9ae16550daec4 *src/Arithmetic.h
@@ -23,7 +23,7 @@ c679561d8b950b83e4d2f6d08a92b23f *src/Geometric.cpp
 89baae61eb60ba85c7d7173e33e918cd *src/Harmonic.h
 c89f34aaa5ed5287f0e919bbb7dd8253 *src/LanceWilliams.cpp
 e28e9c86fc0c98b4846725c383e754c9 *src/LanceWilliams.h
-db288bc2b5b8fd78a9cff9a472fd11e8 *src/Matrix.cpp
+6b2595e6838b8bd14edb735344ea5e4d *src/Matrix.cpp
 82570c22b1e79464d49033d66ee58f09 *src/Matrix.h
 e8967de184bcfc8d3e975001776a63a4 *src/Merger.cpp
 c16dccedabfc5092476297cad19a4b3a *src/Merger.h
@@ -42,4 +42,4 @@ cd9affdcdd7af8d1e85aebc891dfa56f *src/Ward.h
 c16237495ab6f28badca30fbbfefd561 *vignettes/Introduction-bibstyle.csl
 94d52d98f242c69cd950f3f9dad7b1d0 *vignettes/Introduction-references.bib
 9ad58f4e955e798356f2ef1467b0f644 *vignettes/Introduction-style.css
-832d41df8b008dea42cbac5e6bffb11b *vignettes/Introduction.Rmd
+c5a1920818b27d750b29893235824dd6 *vignettes/Introduction.Rmd
