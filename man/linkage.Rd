@@ -195,7 +195,7 @@ descplot(prox, ..., type.prox = "distance", digits = NULL,
   Except for the cases containing tied proximity data, the following 
   equivalences hold between function \code{linkage()} in package \emph{mdendro},
   function \code{\link{hclust}()} in package \emph{stats}, and function 
-  \code{\link{agnes}()} in package \emph{cluster}. Special attention must be 
+  \code{\link[cluster]{agnes}()} in package \emph{cluster}. Special attention must be 
   paid to the equivalence with methods \code{"centroid"} and \code{"median"} of 
   function \code{\link{hclust}()}, since these methods require the input 
   distances to be squared before calling \code{\link{hclust}()} and, 
@@ -245,7 +245,7 @@ descplot(prox, ..., type.prox = "distance", digits = NULL,
 }
 \seealso{
   \code{\link{plot.linkage}}, \code{\link{dist}}, \code{\link{dendrogram}},
-  \code{\link{hclust}}, \code{\link{agnes}}.
+  \code{\link{hclust}}, \code{\link[cluster]{agnes}}.
 }
 \examples{
 ## Plot and summary of unweighted arithmetic linkage (UPGMA) dendrogram

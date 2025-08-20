@@ -1,6 +1,6 @@
 Package: mdendro
-Version: 2.2.1
-Date: 2023-12-31
+Version: 2.2.2
+Date: 2025-08-20
 Title: Extended Agglomerative Hierarchical Clustering
 Description: A comprehensive collection of linkage methods for agglomerative
   hierarchical clustering on a matrix of proximity data (distances or
@@ -25,9 +25,10 @@ LinkingTo: Rcpp
 Suggests: ape, cluster, dendextend, knitr, rmarkdown
 VignetteBuilder: knitr, rmarkdown
 NeedsCompilation: yes
-Packaged: 2024-01-03 17:17:41 UTC; Alberto
-Author: Alberto Fernandez [aut, cre] (<https://orcid.org/0000-0002-1241-1646>),
-  Sergio Gomez [aut] (<https://orcid.org/0000-0003-1820-0062>)
+Packaged: 2025-08-20 14:18:53 UTC; Alberto
+Author: Alberto Fernandez [aut, cre] (ORCID:
+    <https://orcid.org/0000-0002-1241-1646>),
+  Sergio Gomez [aut] (ORCID: <https://orcid.org/0000-0003-1820-0062>)
 Maintainer: Alberto Fernandez <alberto.fernandez@urv.cat>
 Repository: CRAN
-Date/Publication: 2024-01-09 01:00:06 UTC
+Date/Publication: 2025-08-20 15:10:08 UTC

@@ -1,10 +1,10 @@
 ## ----eval = FALSE-------------------------------------------------------------
-#  install.packages("mdendro")
+# install.packages("mdendro")
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  install.packages("devtools")
-#  library(devtools)
-#  install_github("sergio-gomez/mdendro")
+# install.packages("devtools")
+# library(devtools)
+# install_github("sergio-gomez/mdendro")
 
 ## -----------------------------------------------------------------------------
 library(mdendro)
@@ -363,17 +363,17 @@ for (i in 1:length(vals)) {
 }
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  linkage(prox, type.prox = "distance", digits = NULL,
-#          method = "arithmetic", par.method = 0, weighted = FALSE,
-#          group = "variable")
-#  
-#  descval(prox, type.prox = "distance", digits = NULL,
-#          method = "versatile", par.method = c(-1,0,+1), weighted = FALSE,
-#          group = "variable", measure = "cor")
-#  
-#  descplot(prox, ..., type.prox = "distance", digits = NULL,
-#           method = "versatile", par.method = c(-1, 0, +1), weighted = FALSE,
-#           group = "variable", measure = "cor", slope = 10)
+# linkage(prox, type.prox = "distance", digits = NULL,
+#         method = "arithmetic", par.method = 0, weighted = FALSE,
+#         group = "variable")
+# 
+# descval(prox, type.prox = "distance", digits = NULL,
+#         method = "versatile", par.method = c(-1,0,+1), weighted = FALSE,
+#         group = "variable", measure = "cor")
+# 
+# descplot(prox, ..., type.prox = "distance", digits = NULL,
+#          method = "versatile", par.method = c(-1, 0, +1), weighted = FALSE,
+#          group = "variable", measure = "cor", slope = 10)
 
 ## ----echo = FALSE-------------------------------------------------------------
 arguments <- data.frame(
@@ -411,14 +411,14 @@ arguments <- data.frame(
 knitr::kable(arguments, col.names = c("", ""))
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  ## S3 method for class 'linkage'
-#  plot(x, type = c("rectangle", "triangle"),
-#       center = FALSE, edge.root = FALSE,
-#       nodePar = NULL, edgePar = list(),
-#       leaflab = c("perpendicular", "textlike", "none"),
-#       dLeaf = NULL, xlab = "", ylab = "", xaxt = "n", yaxt = "s",
-#       horiz = FALSE, frame.plot = FALSE, xlim, ylim,
-#       col.rng = "lightgray", ...)
+# ## S3 method for class 'linkage'
+# plot(x, type = c("rectangle", "triangle"),
+#      center = FALSE, edge.root = FALSE,
+#      nodePar = NULL, edgePar = list(),
+#      leaflab = c("perpendicular", "textlike", "none"),
+#      dLeaf = NULL, xlab = "", ylab = "", xaxt = "n", yaxt = "s",
+#      horiz = FALSE, frame.plot = FALSE, xlim, ylim,
+#      col.rng = "lightgray", ...)
 
 ## ----echo = FALSE-------------------------------------------------------------
 arguments <- data.frame(
