@@ -1,6 +1,6 @@
 Package: mdendro
-Version: 2.2.2
-Date: 2025-08-20
+Version: 2.2.3
+Date: 2025-09-03
 Title: Extended Agglomerative Hierarchical Clustering
 Description: A comprehensive collection of linkage methods for agglomerative
   hierarchical clustering on a matrix of proximity data (distances or
@@ -8,7 +8,7 @@ Description: A comprehensive collection of linkage methods for agglomerative
   Multidendrograms can group more than two clusters when ties in proximity data
   occur, and therefore they do not depend on the order of the input data.
   Descriptive measures to analyze the resulting dendrogram are additionally
-  provided.
+  provided. <doi:10.18637/jss.v114.i02>.
 Encoding: UTF-8
 Authors@R: c(person(given = "Alberto", family = "Fernandez",
                     email = "alberto.fernandez@urv.cat",
@@ -25,10 +25,10 @@ LinkingTo: Rcpp
 Suggests: ape, cluster, dendextend, knitr, rmarkdown
 VignetteBuilder: knitr, rmarkdown
 NeedsCompilation: yes
-Packaged: 2025-08-20 14:18:53 UTC; Alberto
+Packaged: 2025-09-03 17:23:57 UTC; Alberto
 Author: Alberto Fernandez [aut, cre] (ORCID:
     <https://orcid.org/0000-0002-1241-1646>),
   Sergio Gomez [aut] (ORCID: <https://orcid.org/0000-0003-1820-0062>)
 Maintainer: Alberto Fernandez <alberto.fernandez@urv.cat>
 Repository: CRAN
-Date/Publication: 2025-08-20 15:10:08 UTC
+Date/Publication: 2025-09-04 06:40:27 UTC

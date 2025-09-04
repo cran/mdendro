@@ -1,13 +1,13 @@
-e23783efa4a6813ca6b0ce8907e03201 *DESCRIPTION
+5abfd81f8094761f7a73c5bb0d5b24fe *DESCRIPTION
 d22065baa7f46b3804c03a382eb8cb75 *NAMESPACE
 9e98f2d52fed5c92c8c085c135ecac4d *R/RcppExports.R
 cc7386d5e8f41109c4e46d5485a90c0e *R/linkage.R
 9c64cd100b1a000190e404a7aba15b24 *build/vignette.rds
-8565afed5f819d3e4bbff39dd656718b *inst/CITATION
+291361363e50cbac7ff02e020933a019 *inst/CITATION
 ff1140545bcefcf4b4adefb8641a1209 *inst/doc/Introduction.R
 c5a1920818b27d750b29893235824dd6 *inst/doc/Introduction.Rmd
 de219d8d54cb2d5f1d510035869409cc *inst/doc/Introduction.html
-3e5c730546aad7dcea9d17ab7a225925 *man/linkage.Rd
+48858c6edf3a51d7ef5a9fbe5df920d2 *man/linkage.Rd
 c7132eb08a21101623529f6b0cc3a847 *man/plot.linkage.Rd
 1227355b5a2ba942b6dfa4dd3742e9e5 *src/Arithmetic.cpp
 44e2dc104bbe212301e9ae16550daec4 *src/Arithmetic.h

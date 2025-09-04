@@ -135,10 +135,11 @@ descplot(prox, ..., type.prox = "distance", digits = NULL,
 
   \code{descval()} and \code{descplot()} can be used with methods 
   \code{"versatile"} and \code{"flexible"} to analyze the variation of any 
-  descriptive measure as a function of the corresponding method parameter. Both 
-  functions return a vector with the numerical values of the descriptive measure
-  evaluated at the points contained in the parameter \code{par.method}. Function
-  \code{descplot()}, in addition, draws the corresponding plot.
+  descriptive measure as a function of the corresponding method parameter 
+  (Fernandez and Gomez, 2025). Both functions return a vector with the numerical
+  values of the descriptive measure evaluated at the points contained in the 
+  parameter \code{par.method}. Function \code{descplot()}, in addition, draws 
+  the corresponding plot.
 }
 \value{
   An object of class \code{"linkage"} that describes the multifurcated
@@ -195,13 +196,14 @@ descplot(prox, ..., type.prox = "distance", digits = NULL,
   Except for the cases containing tied proximity data, the following 
   equivalences hold between function \code{linkage()} in package \emph{mdendro},
   function \code{\link{hclust}()} in package \emph{stats}, and function 
-  \code{\link[cluster]{agnes}()} in package \emph{cluster}. Special attention must be 
-  paid to the equivalence with methods \code{"centroid"} and \code{"median"} of 
-  function \code{\link{hclust}()}, since these methods require the input 
-  distances to be squared before calling \code{\link{hclust}()} and, 
-  consequently, the square root of its results should be taken afterwards. When 
-  relevant, weighted (\code{W}) or unweighted (\code{U}) versions of the linkage
-  methods and the value for \code{par.method} (\eqn{\beta}) are indicated:
+  \code{\link[cluster]{agnes}()} in package \emph{cluster} (Fernandez and Gomez,
+  2025). Special attention must be paid to the equivalence with methods 
+  \code{"centroid"} and \code{"median"} of function \code{\link{hclust}()}, 
+  since these methods require the input distances to be squared before calling 
+  \code{\link{hclust}()} and, consequently, the square root of its results 
+  should be taken afterwards. When relevant, weighted (\code{W}) or unweighted 
+  (\code{U}) versions of the linkage methods and the value for \code{par.method}
+  (\eqn{\beta}) are indicated:
   \tabular{lll}{
     \code{linkage()} \tab \code{hclust()} \tab \code{agnes()} \cr
     \code{==================} \tab \code{============} \tab
@@ -226,22 +228,31 @@ descplot(prox, ..., type.prox = "distance", digits = NULL,
 \references{
   Fernandez, A.; Gomez, S. (2008). Solving non-uniqueness in agglomerative 
   hierarchical clustering using multidendrograms. 
-  \emph{Journal of Classification}, \bold{25}, 43--65.
+  \emph{Journal of Classification}, \bold{25}(1), 43--65.
+  <doi:10.1007/s00357-008-9004-x>.
 
   Fernandez, A.; Gomez, S. (2020). Versatile linkage: a family of 
   space-conserving strategies for agglomerative hierarchical clustering. 
-  \emph{Journal of Classification}, \bold{37}, 584--597.
+  \emph{Journal of Classification}, \bold{37}(3), 584--597.
+  <doi:10.1007/s00357-019-09339-z>.
+
+  Fernandez, A.; Gomez, S. (2025). mdendro: an R package for extended 
+  agglomerative hierarchical clustering.
+  \emph{Journal of Statistical Software}, \bold{114}(2), 1--26.
+  <doi:10.18637/jss.v114.i02>.
 
   Rousseeuw, P.J. (1986). A visual display for hierarchical classification. In
-  E. Diday \emph{et al.} (eds.) \emph{Data Analysis and Informatics 4}, pp.
-  743--748. Amsterdam: North-Holland.
+  E. Diday \emph{et al.} (eds.) \emph{Data Analysis and Informatics, IV}, pp.
+  743--748. North-Holland, Amsterdam.
 
   Sokal, R.R.; Rohlf, F.J. (1962). The comparison of dendrograms by objective
-  methods. \emph{Taxon}, \bold{11}, 33--40.
+  methods. \emph{Taxon}, \bold{11}(2), 33--40.
+  <doi:10.2307/1217208>.
 
   Williams, W.T.; Lambert, J.M.; Lance, G.N. (1966). Multivariate methods in
   plant ecology: V. Similarity analyses and information-analysis.
-  \emph{Journal of Ecology}, \bold{54}, 427--445.
+  \emph{Journal of Ecology}, \bold{54}(2), 427--445.
+  <doi:10.2307/2257960>.
 }
 \seealso{
   \code{\link{plot.linkage}}, \code{\link{dist}}, \code{\link{dendrogram}},
